@@ -1,0 +1,55 @@
+[bundles]
+    annotation = [ 'asm-debug', 'gson', 'guava', 'lombok' ]
+    compile = [ 'lombok' ]
+    runtime = [ 'bookshelf', 'caliper', 'hei', 'tipthescales', 'top-ce', 'top-deps' ]
+    runtime-bc = [ 'brandonscore', 'codechickenlib', 'rf' ]
+
+[libraries]
+    # Annotation Dependencies
+    asm-debug = { group = 'org.ow2.asm', name = 'asm-debug-all', version.ref = 'asm-debug' }
+    gson = { group = 'com.google.code.gson', name = 'gson', version.ref = 'gson' }
+    guava = { group = 'com.google.guava', name = 'guava', version.ref = 'guava' }
+    lombok = { group = 'org.projectlombok', name = 'lombok', version.ref = 'lombok' } # +compile
+
+    # Runtime Dependencies
+    bookshelf = { group = 'curse.maven', name = 'bookshelf-228525', version.ref = 'bookshelf' }
+    brandonscore = { group = 'curse.maven', name = 'brandons-core-231382', version.ref = 'brandonscore' }
+    caliper = { group = 'curse.maven', name = 'caliper-266824', version.ref = 'caliper' }
+    codechickenlib = { group = 'curse.maven', name = 'ccl-242818', version.ref = 'codechickenlib' }
+    hei = { group = 'mezz', name = 'jei', version.ref = 'hei' }
+    rf = { group = 'curse.maven', name = 'rf-270789', version.ref = 'rf' }
+    tipthescales = { group = 'curse.maven', name = 'tipthescales-282313', version.ref = 'tipthescales' }
+    top-ce = { group = 'curse.maven', name = 'top-ce-885670', version.ref = 'top-ce' }
+    top-deps = { group = 'curse.maven', name = 'top-deps-1120632', version.ref = 'top-deps' }
+
+[plugins]
+    doctor = { id = 'com.osacky.doctor', version.ref = 'doctor' }
+    unimined = { id = 'xyz.wagyourtail.unimined', version.ref = 'unimined' }
+
+[versions]
+    # Core
+    forge = '14.23.5.2860'
+    mappings = '39-1.12'
+    minecraft = '1.12.2'
+    self = '0.0.1'
+
+    # Dependencies
+    asm-debug = '5.2'
+    gson = '2.8.9'
+    guava = '32.1.3-jre'
+    hei = '4.+'
+    lombok = '1.+'
+
+    # Dependencies (CurseForge)
+    bookshelf = '2836960'
+    brandonscore = '3408276'
+    caliper = '2810222'
+    codechickenlib = '2779848'
+    rf = '2920436'
+    tipthescales = '2689835'
+    top-ce = '7129885'
+    top-deps = '6512825'
+
+    # Plugins
+    doctor = '0.11.+'
+    unimined = '1.+'

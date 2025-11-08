@@ -1,0 +1,152 @@
+import static org.gradle.api.file.DuplicatesStrategy.INCLUDE
+
+plugins {
+    id 'java'
+    alias libs.plugins.doctor
+    alias libs.plugins.unimined
+}
+
+group = mod_package
+version = libs.versions.self.get()
+
+base {
+    archivesName = mod_name
+}
+
+unimined.useGlobalCache = false
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of 8
+    withSourcesJar()
+}
+
+configurations {
+    runtimeOnly.extendsFrom create('modRuntimeOnly')
+}
+
+unimined.minecraft {
+    version libs.versions.minecraft.get()
+    mappings {
+        searge()
+        mcp 'stable', libs.versions.mappings.get()
+    }
+    runs {
+        //noinspection ConfigurationAvoidance
+        all {
+            def run_args = getSystemProperties()
+            run_args[forge_log_markers_arg] = forge_log_markers
+            [ forge_log_level_console, log4j_status_level ].each {
+                run_args[it] = 'debug'
+            }
+            [ 'debug.export', 'hotSwap', 'checks.interfaces' ].each {
+                run_args["mixin.$it"] = 'true'
+            }
+        }
+        config('client') {
+            args+=[ '--username', minecraft_username, '--uuid', minecraft_uuid ]
+        }
+        config('server') {
+            args+=[ 'nogui' ]
+        }
+    }
+    mods {
+        modImplementation {
+            catchAWNamespaceAssertion()
+        }
+        remap(configurations.modRuntimeOnly) {
+            catchAWNamespaceAssertion()
+        }
+    }
+    minecraftForge {
+        loader libs.versions.forge.get()
+        accessTransformer "$meta_inf_path/${mod_id}_at.cfg"
+    }
+    defaultRemapJar = true
+}
+
+repositories {
+    [ cleanroom_content, cursemaven_content ].each {
+        def content_split = it.split ';;'
+        def content_def = content_split[0].split ';'
+        maven {
+            name = content_def[0]
+            url = uri "https://${content_def[1]}"
+            if(content_split.length>1) {
+                content {
+                    content_split[1].split(';').each {grp ->
+                        includeGroup grp
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    annotationProcessor libs.bundles.annotation
+    compileOnly libs.bundles.compile
+    //mod dependencies need remapping
+    modRuntimeOnly libs.bundles.runtime
+    //modRuntimeOnly libs.bundles.runtime.bc
+}
+
+processResources {
+    duplicatesStrategy = INCLUDE
+    def replacements = [
+            'author_list': mod_authors,
+            'credits': mod_credits,
+            'description': mod_description,
+            'license': mod_license,
+            'logo': mod_logo,
+            'mcversion': libs.versions.minecraft.get(),
+            'modid': mod_id,
+            'name': mod_name,
+            'version': version
+    ]
+    inputs.properties replacements
+    from(sourceSets.main.resources.srcDirs) { //include all files from srcDirs
+        filesMatching('mcmod.info') { //only replace properties for matching files
+            expand replacements
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                'FMLAT': 'time_at.cfg',
+                'Implementation-Title': mod_name,
+                'Implementation-Version': version
+        ])
+    }
+}
+
+def mod_package_path = "$mod_package".replace '.', '/'
+def ref_path = "$mod_package_path/core/TimeRef.java"
+def gen_dir = file "${layout.buildDirectory.asFile.get()}/generated/sources/ref"
+
+sourceSets.main.java {
+    srcDir gen_dir
+    exclude ref_path
+}
+
+tasks.register('injectConstants',Copy) {
+    def src_file = file "src/main/java/${ref_path}"
+    def replacements = [
+            mod_id: mod_id,
+            name: mod_name,
+            version: version
+    ]
+    inputs.file src_file
+    inputs.properties replacements
+    outputs.dir gen_dir
+    from(src_file.parentFile) {
+        include src_file.name
+        expand replacements
+        into "java/$mod_package_path/core"
+    }
+    into gen_dir
+}
+
+tasks.compileJava.dependsOn 'injectConstants'
+tasks.sourcesJar.mustRunAfter 'injectConstants'

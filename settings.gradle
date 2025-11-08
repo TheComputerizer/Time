@@ -1,0 +1,29 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name = 'WagYourMaven Releases'
+            url = uri 'https://maven.wagyourtail.xyz/releases'
+            content {
+                unimined_releases.split(';').each {grp ->
+                    includeGroup grp
+                }
+            }
+        }
+        maven {
+            name = 'WagYourMaven Snapshots'
+            url = uri 'https://maven.wagyourtail.xyz/snapshots'
+            content {
+                unimined_snapshots.split(';').each {grp ->
+                    includeGroup grp
+                }
+            }
+        }
+    }
+}
+
+plugins { //Settings plugins can't use version catalogs since the catalogs haven't initialized yet
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '+'
+}
+
+rootProject.name = 'Time'
